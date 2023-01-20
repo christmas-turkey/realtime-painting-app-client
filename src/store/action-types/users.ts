@@ -1,0 +1,4 @@
+export const enum UsersActionTypes {
+    ADD_GUEST_USER="ADD_GUEST_USER",
+    SET_CURSOR_CALLBACK="SET_CURSOR_CALLBACK"
+}

@@ -1,0 +1,55 @@
+@import "../../variables";
+
+
+.canvas-header {
+    position: absolute;
+    width: 100%;
+    padding: 15px 20px;
+    justify-content: space-between;
+    align-items: center;
+    background-color: $black;
+
+    &, &__parameters-bar, &__options-buttons {
+        display: flex;
+    }
+}
+
+.parameters-bar {
+    &__group {
+        margin-right: 15px;
+        display: flex;
+        align-items: center;
+    }
+
+    &__label {
+        font-size: 16px;
+        letter-spacing: 1px;
+        margin-right: 5px;
+        color: #fff;
+    }
+
+    &__color, &__number-input {
+        margin: 0 5px;
+    }
+
+    &__color {
+        width: 25px;
+        height: 25px;
+        border-radius: 50%;
+        outline: 1px solid #646464;
+        border: 5px solid #fff;
+    }
+}
+
+.options-buttons {
+    &__item {
+        background: none;
+        font-size: 22px;
+        color: #fff;
+        margin-left: 10px;
+    }
+
+    &__clear {
+        color: $lightred;
+    }
+}

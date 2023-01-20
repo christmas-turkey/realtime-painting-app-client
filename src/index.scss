@@ -1,0 +1,33 @@
+@import url('https://fonts.googleapis.com/css2?family=Roboto&display=swap');
+@import "./variables";
+
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: 'Roboto', sans-serif;
+  color: $black;
+}
+
+button {
+  cursor: pointer;
+  border: none;
+  outline: none;
+}
+
+.transition {
+  transition: 0.5s opacity;
+
+  &:hover {
+    opacity: 0.8;
+  }
+}
+
+.app {
+  height: 100vh;
+  overflow: hidden;
+  display: flex;
+}

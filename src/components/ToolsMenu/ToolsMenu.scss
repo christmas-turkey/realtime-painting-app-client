@@ -1,0 +1,19 @@
+@import "../../_variables.scss";
+
+.tools-menu {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+
+    .tools-menu__item {
+        padding: 15px 20px;
+        background: none;
+        font-size: 24px;
+        color: #fff;
+
+        &.active {
+            border-left: 3px solid $yellow;
+            background-color: darken($color: $black, $amount: 5);
+        }
+    }
+}
