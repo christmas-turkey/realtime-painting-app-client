@@ -2,9 +2,8 @@
 
 
 .canvas-header {
-    position: absolute;
     width: 100%;
-    padding: 15px 20px;
+    padding: 0 22px;
     justify-content: space-between;
     align-items: center;
     background-color: $black;
@@ -15,6 +14,7 @@
 }
 
 .parameters-bar {
+
     &__group {
         margin-right: 15px;
         display: flex;
@@ -28,11 +28,11 @@
         color: #fff;
     }
 
-    &__color, &__number-input {
+    &__color-picker, &__number-input {
         margin: 0 5px;
     }
 
-    &__color {
+    &__color-picker {
         width: 25px;
         height: 25px;
         border-radius: 50%;
@@ -42,11 +42,12 @@
 }
 
 .options-buttons {
+
     &__item {
+        margin: 20px 0 20px 30px;
         background: none;
-        font-size: 22px;
+        font-size: 24px;
         color: #fff;
-        margin-left: 10px;
     }
 
     &__clear {

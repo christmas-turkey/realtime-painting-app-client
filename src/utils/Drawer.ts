@@ -1,4 +1,6 @@
-import socket from "../socket"
+import { DrawerParametersType } from './../types/types';
+import socket from "../core/socket"
+
 
 export interface EventListenerType {
     type: string
@@ -10,13 +12,7 @@ export interface ShapeDataType {
     initialPos: [number, number]
 }
 
-export interface ParametersType {
-    fillColor: string, 
-    strokeColor: string, 
-    strokeWidth: number
-}
-
-export const defaultParameters: ParametersType = {
+export const defaultParameters: DrawerParametersType = {
     fillColor: "#fff",
     strokeColor: "#000",
     strokeWidth: 1
@@ -27,14 +23,15 @@ class Drawer {
     canvasElement: HTMLCanvasElement
     ctx: CanvasRenderingContext2D
     eventListeners: EventListenerType[] = []
-    parameters: ParametersType
     contentHistory: string[] = []
+    parameters: DrawerParametersType = defaultParameters
+    roomId: string
 
 
-    constructor(canvasElement: HTMLCanvasElement, ctx: CanvasRenderingContext2D) {
+    constructor(canvasElement: HTMLCanvasElement, roomId: string) {
         this.canvasElement = canvasElement
-        this.ctx = ctx
-        this.parameters = defaultParameters
+        this.ctx = canvasElement.getContext("2d")!
+        this.roomId = roomId
     }
 
     pushEventListener(eventListener: EventListenerType) {
@@ -49,24 +46,31 @@ class Drawer {
         this.eventListeners = []
     }
 
+    drawContent(content: string) {
+        const image = new Image()
+        image.src = content
+        image.onload = () => {
+            this.ctx.clearRect(0, 0, this.canvasElement.width, this.canvasElement.height)
+            this.ctx.drawImage(image, 0, 0)
+        }
+    }
+
     createShape(drawShape: (shapeData: ShapeDataType) => void) {
         let initialPos: [number, number] | null = null
-        let prevContent: HTMLImageElement = new Image
+        let prevContentImage: HTMLImageElement = new Image()
 
         this.clearEventListeners()
 
         this.pushEventListener({type: "mousedown", listener: (event) => {
             initialPos = [event.offsetX, event.offsetY]
-            const dataUrl = this.canvasElement.toDataURL("image/png")
-            prevContent.src = dataUrl
+            prevContentImage.src = this.canvasElement.toDataURL()
         }})
 
         this.pushEventListener({type: "mousemove", listener: (event) => {
             if (initialPos) {
-                this.ctx.clearRect(0, 0, this.canvasElement.width, this.canvasElement.height)
-
-                if (prevContent.src) {
-                    this.ctx.drawImage(prevContent, 0, 0)
+                if (prevContentImage) {
+                    this.ctx.clearRect(0, 0, this.canvasElement.width, this.canvasElement.height)
+                    this.ctx.drawImage(prevContentImage, 0, 0)
                 }
 
                 this.ctx.beginPath()
@@ -74,23 +78,30 @@ class Drawer {
                 this.ctx.lineWidth = this.parameters.strokeWidth
                 this.ctx.fillStyle = this.parameters.fillColor
 
-                drawShape({
-                    event,
-                    initialPos,
-                })
+                drawShape({event, initialPos})
 
                 this.ctx.fill()
                 if (this.parameters.strokeWidth > 0) {
                     this.ctx.stroke()  
-                } 
-
-                socket.emit("SEND_CONTENT", this.canvasElement.toDataURL("image/png"))
+                }
+                
+                socket.emit("UPDATE_CANVAS_CONTENT", {
+                    contentHistory: this.contentHistory,
+                    content: this.canvasElement.toDataURL(),
+                    roomId: this.roomId
+                })
             }
         }})
 
         this.pushEventListener({type: "mouseup", listener: () => {
             initialPos = null
-            this.contentHistory.push(this.canvasElement.toDataURL("image/png"))
+            this.contentHistory.push(this.canvasElement.toDataURL())
+
+            socket.emit("UPDATE_CANVAS_CONTENT", {
+                contentHistory: this.contentHistory,
+                content: this.canvasElement.toDataURL(),
+                roomId: this.roomId
+            })
         }})
     }
 
@@ -111,9 +122,15 @@ class Drawer {
             prevPos = [event.offsetX, event.offsetY]
         }})
 
-        this.pushEventListener({type: "mouseup", listener: e => {
+        this.pushEventListener({type: "mouseup", listener: () => {
             prevPos = null
-            this.contentHistory.push(this.canvasElement.toDataURL("image/png"))
+            this.contentHistory.push(this.canvasElement.toDataURL())
+
+            socket.emit("UPDATE_CANVAS_CONTENT", {
+                contentHistory: this.contentHistory,
+                content: this.canvasElement.toDataURL(),
+                roomId: this.roomId
+            })
         }})
 
         this.pushEventListener({type: "mousemove", listener: event => {
@@ -128,7 +145,13 @@ class Drawer {
                 this.ctx.stroke()
     
                 prevPos = [event.offsetX, event.offsetY]
-              }
+
+                socket.emit("UPDATE_CANVAS_CONTENT", {
+                    contentHistory: this.contentHistory,
+                    content: this.canvasElement.toDataURL(),
+                    roomId: this.roomId
+                })
+            }
         }})
     }
 
@@ -147,27 +170,26 @@ class Drawer {
     polygon(sides: number) {
         this.createShape(({event, initialPos}) => {
             
-            let sizeX = Math.abs(event.offsetX - initialPos[0])
-            let sizeY = Math.abs(event.offsetY - initialPos[1])
+            let radiusX = Math.abs(event.offsetX - initialPos[0])
+            let radiusY = Math.abs(event.offsetY - initialPos[1])
             const angle = (2 * Math.PI) / sides
             const rotation = ((sides-2)*Math.PI/sides) / 2
-            console.log(rotation)
     
             if (event.shiftKey) {
-                const minSize = Math.min(sizeX, sizeY)
+                const minSize = Math.min(radiusX, radiusY)
                 this.ctx.lineTo (initialPos[0] + minSize * Math.cos(rotation), initialPos[1] + minSize * Math.sin(rotation));
     
             } else {
-                this.ctx.lineTo(initialPos[0] + sizeX * Math.cos(rotation), initialPos[1] + sizeY * Math.sin(rotation));
+                this.ctx.lineTo(initialPos[0] + radiusX * Math.cos(rotation), initialPos[1] + radiusY * Math.sin(rotation));
             }         
     
             for (let i=1; i<=sides; i++) {
                 if (event.shiftKey) {
-                    const minSize = Math.min(sizeX, sizeY)
+                    const minSize = Math.min(radiusX, radiusY)
                     this.ctx.lineTo (initialPos[0] + minSize * Math.cos(rotation + i*angle), initialPos[1] + minSize * Math.sin(rotation + i*angle));
     
                 } else {
-                    this.ctx.lineTo(initialPos[0] + sizeX * Math.cos(rotation + i*angle), initialPos[1] + sizeY * Math.sin(rotation + i*angle));
+                    this.ctx.lineTo(initialPos[0] + radiusX * Math.cos(rotation + i*angle), initialPos[1] + radiusY * Math.sin(rotation + i*angle));
                 }
             }
 
@@ -193,6 +215,9 @@ class Drawer {
 
     clearCanvas() {
         this.ctx.clearRect(0, 0, this.canvasElement.width, this.canvasElement.height)
+        socket.emit("CLEAR_CANVAS", {
+            roomId: this.roomId
+        })
     }
 
     undo() {
@@ -200,12 +225,12 @@ class Drawer {
         const prevContent = this.contentHistory[this.contentHistory.length - 1]
 
         if (prevContent) {
-            const image = new Image()
-            image.src = prevContent
-            image.onload = () => {
-                this.clearCanvas()
-                this.ctx.drawImage(image, 0, 0)
-            }
+            this.drawContent(prevContent)
+            socket.emit("UPDATE_CANVAS_CONTENT", {
+                contentHistory: this.contentHistory,
+                content: this.canvasElement.toDataURL(),
+                roomId: this.roomId
+            })
         } else {
             this.clearCanvas()
         }

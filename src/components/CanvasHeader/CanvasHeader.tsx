@@ -1,4 +1,4 @@
-import React, {useEffect} from 'react'
+import React from 'react'
 import { InputNumber, Popover } from 'antd'
 import {RedoOutlined, DeleteOutlined} from "@ant-design/icons"
 import { ColorResult, SketchPicker } from 'react-color'
@@ -12,21 +12,15 @@ const CanvasHeader: React.FC = () => {
   const {drawer, parameters} = useTypedSelector(state => state.canvas)
 
   const onFillColor = (color: ColorResult) => {
-    if (drawer) {
-        actions.canvas.setDrawerParameters({fillColor: color.hex})
-    }
+    actions.canvas.setDrawerParameters({fillColor: color.hex})
   }
 
   const onStrokeColor = (color: ColorResult) => {
-    if (drawer) {
-      actions.canvas.setDrawerParameters({strokeColor: color.hex})
-    }
+    actions.canvas.setDrawerParameters({strokeColor: color.hex})
   }
 
   const onStrokeWidth = (width: number) => {
-    if (drawer) {
-      actions.canvas.setDrawerParameters({strokeWidth: width})
-    }
+    actions.canvas.setDrawerParameters({strokeWidth: width})
   }
 
   const onClearCanvas = () => {
@@ -47,17 +41,19 @@ const CanvasHeader: React.FC = () => {
             <div className='parameters-bar__group'>
                 <div className='parameters-bar__label'>Fill:</div>
                 <Popover 
-                    content={<SketchPicker color={parameters.fillColor} onChangeComplete={onFillColor} />}
+                    content={<SketchPicker color={parameters.fillColor} 
+                    onChangeComplete={onFillColor} />}
                     trigger={["click"]}>
-                    <button style={{backgroundColor: parameters.fillColor}} className='parameters-bar__color'></button>
+                    <button style={{backgroundColor: parameters.fillColor}} className='parameters-bar__color-picker'></button>
                 </Popover>
             </div>
             <div className='parameters-bar__group'>
                 <div className='parameters-bar__label'>Stroke:</div>
                 <Popover 
-                    content={<SketchPicker color={parameters.strokeColor} onChangeComplete={onStrokeColor} />}
+                    content={<SketchPicker color={parameters.strokeColor} 
+                    onChangeComplete={onStrokeColor} />}
                     trigger={["click"]}>
-                    <button style={{backgroundColor: parameters.strokeColor}} className='parameters-bar__color'></button>
+                    <button style={{backgroundColor: parameters.strokeColor}} className='parameters-bar__color-picker'></button>
                 </Popover>
                 <InputNumber 
                     className='parameters-bar__number-input'

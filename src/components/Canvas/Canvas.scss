@@ -2,19 +2,18 @@
 
 .canvas-wrapper {
     overflow: hidden;
-    position: relative;
     
     &__cursor {
         position: absolute;
         font-size: 18px;
     }
-}
 
-.canvas {
-    background-color: #fff;
-    cursor: crosshair;
+    &__canvas {
+        background-color: #fff;
+        cursor: crosshair;
+    }
 
-    &, .canvas-wrapper {
+    &__canvas, & {
         width: 100%;
         height: 100%;
     }

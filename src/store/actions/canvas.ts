@@ -1,4 +1,4 @@
-import { ParametersType } from './../../utils/Drawer';
+import { DrawerParametersType } from './../../types/types';
 import { CanvasActionTypes } from "../action-types/canvas";
 import Drawer from "../../utils/Drawer";
 
@@ -9,7 +9,7 @@ export interface SetDrawerInstanceAction {
 
 export interface SetDrawerParametersAction {
     type: CanvasActionTypes.SET_DRAWER_PARAMETERS,
-    payload: Partial<ParametersType>
+    payload: Partial<DrawerParametersType>
 }
 
 export type CanvasAction = SetDrawerInstanceAction | SetDrawerParametersAction

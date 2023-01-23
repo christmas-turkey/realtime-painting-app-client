@@ -1,11 +1,12 @@
-import { ParametersType, defaultParameters } from './../../utils/Drawer';
+import { DrawerParametersType } from './../../types/types';
+import { defaultParameters } from './../../utils/Drawer';
 import { CanvasAction } from './../actions/canvas';
 import Drawer from "../../utils/Drawer"
 import { CanvasActionTypes } from '../action-types/canvas';
 
 export interface CanvasState {
     drawer: Drawer | null,
-    parameters: ParametersType
+    parameters: DrawerParametersType
 }
 
 const initialState: CanvasState = {
@@ -20,7 +21,9 @@ export default (state: CanvasState = initialState, action: CanvasAction): Canvas
         
         case CanvasActionTypes.SET_DRAWER_PARAMETERS:
             const parameters = {...state.parameters, ...action.payload}
-            state.drawer!.parameters = parameters
+            if (state.drawer) {
+                state.drawer.parameters = parameters
+            }
             return {...state, parameters}
     
         default:
